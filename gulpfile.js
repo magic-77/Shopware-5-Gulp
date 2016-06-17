@@ -8,7 +8,8 @@ var gulp = require('gulp'),
   $ = require('gulp-load-plugins')(),
   gutil = require('gulp-util'),
   minimist = require('minimist'),
-  fs = require('fs'),
+  nfs = require('fs'),
+  npath = require('path'),
   sequence = require('run-sequence');
 
 
@@ -26,10 +27,12 @@ var cliflags = {
 var shopId = minimist(process.argv.slice(2), cliflags).shopId,
   file = '../web/cache/config_' + shopId + '.json',
   config = require(file),
-  pathObject = require('path').parse(config.lessTarget),
+  pathObject = npath.parse(config.lessTarget),
   jsFiles = [],
   content = '',
-  excludeSWtheme = minimist(process.argv.slice(2), cliflags).excludeSWtheme;
+  excludeSWtheme = minimist(process.argv.slice(2), cliflags).excludeSWtheme,
+  targetThemeSrc = 'Frontend/Mcustom/frontend/_public/src',
+  jsSearchPattern = '/js/jquery.**.js';
 
 
 /**
@@ -81,7 +84,7 @@ config['less'].forEach(function(item) {
   }
   content += "\n";
 });
-fs.writeFileSync(path.lessSource, content);
+nfs.writeFileSync(path.lessSource, content);
 
 
 /**
@@ -119,7 +122,7 @@ gulp.task('less:dev', function() {
       title: 'LESS Error'
     }))
     .pipe($.sourcemaps.write('.', {
-      sourceMappingURLPrefix: pathObject.dir
+      sourceMappingURLPrefix: '/' + pathObject.dir
     }))
     .pipe(gulp.dest(path.build));
 });
@@ -158,7 +161,11 @@ gulp.task('less:dist', function() {
     JS Development
 */
 gulp.task('concat', function() {
-  return gulp.src(jsFiles)
+  var swjs = gulp.src(jsFiles),
+    customjs = gulp.src(targetThemeSrc + jsSearchPattern);
+
+  // Merge two Stream 1) Shopware Them Scripts, 2) Custom Theme Scripts
+  return $.merge(swjs, customjs)
     .pipe($.concat(path.jsTarget))
     .pipe(gulp.dest(path.build));
 });
@@ -228,11 +235,12 @@ gulp.task('eslint', function() {
 
 gulp.task('watch', function() {
   gulp.watch(path.watch.less, ['less:dev']);
-  gulp.watch(path.watch.js, ['concat']);
+  gulp.watch(path.watch.js, ['eslint', 'concat']);
 });
 
 gulp.task('default', function(cb) {
   sequence(['less:dev', 'eslint', 'concat'], 'watch', cb);
+  //sequence('less:dev', 'eslint', 'concat','watch', cb);
 });
 
 gulp.task('dist', function(cb) {
