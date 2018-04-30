@@ -3,7 +3,6 @@
   "name": "Shopware-5-Gulp",
   "description": "Simple Shopware 5 Gulp Workflow",
   "version": "0.0.4",
-  "private": true,
   "devDependencies": {
     "clean-css": "^3.4.17",
     "gulp": "^3.9.1",
