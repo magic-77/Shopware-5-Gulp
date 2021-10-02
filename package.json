@@ -4,7 +4,7 @@
   "description": "Simple Shopware 5 Gulp Workflow",
   "version": "0.0.4",
   "devDependencies": {
-    "clean-css": "^3.4.17",
+    "clean-css": ">=4.1.11",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-cached": "^1.1.0",
